@@ -42,7 +42,15 @@ class CacheSaveHandler
 
     private function ignore(UriInterface $uri): bool
     {
-        return !empty($uri->getQuery());
+        if (!empty($uri->getQuery())) {
+            return true;
+        }
+
+        if (preg_match('/^\/?neos\//', $uri->getPath())) {
+            return true;
+        }
+
+        return false;
     }
 
     private function pathFromUrl(UriInterface $url): string

@@ -74,4 +74,10 @@ class CacheSaveHandlerTest extends TestCase
         );
     }
 
+    public function testShouldIgnoreNeosBackendUrls()
+    {
+        $this->subject->save(new Uri('https://example.com/neos/login'), 'foo');
+        $this->assertFalse($this->fileSaver->wasCalled());
+    }
+
 }

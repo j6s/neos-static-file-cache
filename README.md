@@ -56,7 +56,6 @@ location @staticfilecache {
 
 ## TODO
 - Detect if a user is logged into the backend. Logged-in users should not get cached pages.
-- Detect if a user is currently using the backend. Backend pages should not be cached.
 - Add checkbox to pages to disable caching.
 - Automatically detect if a node on the page is a plugin and disable caching for the page (is that even possible?).
 - Hook into `cache:clear` and clear the static file cache directory.
