@@ -1,4 +1,4 @@
-# Neos Static File Cache
+# Neos Static File Cache ![](https://api.travis-ci.org/j6s/neos-static-file-cache.svg?branch=development)
 
 This plugin allows for simple static file caching by leveraging webserver
 rewrite capabilities to circumvent calling PHP altogether when reading from cache.
