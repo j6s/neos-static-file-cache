@@ -38,6 +38,15 @@ location @staticfilecache {
     if ($args != '') {
         return 405;
     }
+    
+    # Do not return cached content if headers indicate that the
+    # user exclicitly wants non-cached content.
+    if ($http_pragma = no-cache) {
+        return 405;
+    }
+    if ($http_cache_control = no-cache) {
+        return 405;
+    }
 
     # Do not attempt to server from cache when the
     # request is not a GET or HEAD request.
