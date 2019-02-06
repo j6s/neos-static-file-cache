@@ -1,0 +1,10 @@
+language: php
+
+php:
+  - '7.2'
+  - '7.3'
+
+script:
+  - ./vendor/bin/phpcs
+  - ./vendor/bin/phpstan analyze Classes
+  - ./vendor/bin/phpunit

@@ -1,0 +1,22 @@
+#Neos:
+#  Flow:
+#    resource:
+#
+#      storages:
+#        staticFileCacheStorage:
+#          storage: 'Neos\Flow\ResourceManagement\Storage\FileSystemStorage'
+#          storageOptions:
+#            path: '%FLOW_PATH_DATA%Temporary/StaticFileCache/'
+#
+#      targets:
+#        staticFileCacheTarget:
+#          target: 'Neos\Flow\ResourceManagement\Target\FileSystemSymlinkTarget'
+#          targetOptions:
+#            path: '%FLOW_PATH_WEB%_StaticFileCache/'
+#            baseUri: '_StaticFileCache/'
+#            subdivideHashPathSegment: false
+#
+#      collections:
+#        staticFileCacheCollection:
+#          storage: 'staticFileCacheStorage'
+#          target: 'staticFileCacheTarget'
