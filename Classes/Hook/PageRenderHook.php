@@ -8,6 +8,7 @@ use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\RequestInterface;
 use Neos\Flow\Mvc\ResponseInterface;
+use Neos\Neos\Controller\Frontend\NodeController;
 
 class PageRenderHook
 {
@@ -32,9 +33,18 @@ class PageRenderHook
         );
     }
 
-    private function shouldBeSaved(RequestInterface $request): bool
+    private function shouldBeSaved(ActionRequest $request): bool
     {
         if (!$request->isMainRequest()) {
+            return false;
+        }
+
+        if ($request->getControllerObjectName() !== NodeController::class) {
+            return false;
+        }
+
+        $http = $request->getHttpRequest();
+        if ($http->getHeader('cache-control') === 'no-cache' || $http->getHeader('pragma') === 'no-cache') {
             return false;
         }
 
