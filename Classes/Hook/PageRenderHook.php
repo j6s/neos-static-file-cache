@@ -23,7 +23,7 @@ class PageRenderHook
         ResponseInterface $response,
         ControllerInterface $controller
     ): void {
-        if (!($request instanceof ActionRequest) || !$this->shouldBeSaved($request)) {
+        if (!($request instanceof ActionRequest) || !$this->shouldBeSaved($request, $controller)) {
             return;
         }
 
@@ -33,18 +33,18 @@ class PageRenderHook
         );
     }
 
-    private function shouldBeSaved(ActionRequest $request): bool
+    private function shouldBeSaved(ActionRequest $request, ControllerInterface $controller): bool
     {
         if (!$request->isMainRequest()) {
             return false;
         }
 
-        if ($request->getControllerObjectName() !== NodeController::class) {
+        if (!($controller instanceof NodeController)) {
             return false;
         }
 
         $http = $request->getHttpRequest();
-        if ($http->getHeader('cache-control') === 'no-cache' || $http->getHeader('pragma') === 'no-cache') {
+        if ($http->getHeader('Cache-Control') === 'no-cache' || $http->getHeader('Pragma') === 'no-cache') {
             return false;
         }
 
