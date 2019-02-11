@@ -8,6 +8,6 @@ install:
   - 'composer install'
 
 script:
-  - ./vendor/bin/phpcs
-  - ./vendor/bin/phpstan analyze Classes
-  - ./vendor/bin/phpunit
+  - ./Packages/Libraries/bin/phpcs
+  - ./Packages/Libraries/bin/phpstan analyze Classes
+  - ./Packages/Libraries/bin/phpunit

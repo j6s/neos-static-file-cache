@@ -16,21 +16,15 @@ class CacheSaveHandler
 
     /**
      * @var Environment
+     * @Flow\Inject()
      */
     protected $environment;
-    public function injectEnvironment(Environment $environment): void
-    {
-        $this->environment = $environment;
-    }
 
     /**
      * @var FileSaver
+     * @Flow\Inject()
      */
     protected $fileSaver;
-    public function injectFileSaver(FileSaver $fileSaver): void
-    {
-        $this->fileSaver = $fileSaver;
-    }
 
     public function save(UriInterface $url, string $body): void
     {

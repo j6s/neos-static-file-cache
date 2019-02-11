@@ -3,21 +3,25 @@ namespace J6s\StaticFileCache\Tests\Handler;
 
 
 use J6s\StaticFileCache\Handler\CacheSaveHandler;
+use J6s\StaticFileCache\Service\FileSaver;
+use J6s\StaticFileCache\Service\FilesystemSaver;
 use J6s\StaticFileCache\Tests\Mocks\EnvironmentMock;
 use J6s\StaticFileCache\Tests\Mocks\MockFileSaver;
 use Neos\Flow\Http\Uri;
-use PHPUnit\Framework\TestCase;
+use Neos\Flow\Tests\FunctionalTestCase;
+use Neos\Flow\Utility\Environment;
+use PHPUnit\Framework\MockObject\MockObject;
 
-class CacheSaveHandlerTest extends TestCase
+class CacheSaveHandlerTest extends FunctionalTestCase
 {
 
     /** @var CacheSaveHandler */
     private $subject;
 
-    /** @var EnvironmentMock */
+    /** @var MockObject<Environment> */
     private $environment;
 
-    /** @var MockFileSaver */
+    /** @var MockObject<FileSaver> */
     private $fileSaver;
 
     /** @var string */
@@ -25,59 +29,60 @@ class CacheSaveHandlerTest extends TestCase
 
     public function setUp(): void
     {
-        $this->subject = new CacheSaveHandler();
-        $this->environment = new EnvironmentMock();
-        $this->fileSaver = new MockFileSaver();
-        $this->subject->injectEnvironment($this->environment);
-        $this->subject->injectFileSaver($this->fileSaver);
+        parent::setUp();
 
-        if (!defined('FLOW_PATH_WEB')) {
-            define('FLOW_PATH_WEB', sys_get_temp_dir());
-        }
+        $this->fileSaver = $this->getMockBuilder(FilesystemSaver::class)
+            ->setMethods([ 'saveFile' ])
+            ->getMock();
+
+        $this->environment = $this->getMockBuilder(Environment::class)
+            ->setMethods([ 'isRewriteEnabled' ])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->subject = $this->objectManager->get(CacheSaveHandler::class);
+        $this->inject($this->subject, 'fileSaver', $this->fileSaver);
+        $this->inject($this->subject, 'environment', $this->environment);
         $this->pathWeb = FLOW_PATH_WEB;
     }
 
-    public function testShouldSaveContentsInFolder()
+    public function testShouldSaveContentsInFolder(): void
     {
+        $this->environment->method('isRewriteEnabled')->willReturn(true);
+        $this->fileSaver->expects($this->once())
+            ->method('saveFile')
+            ->with($this->equalTo($this->pathWeb . '/_StaticFileCache/https/example.com/my/fancy/page.html'));
         $this->subject->save(new Uri('https://example.com/my/fancy/page.html'), 'foo');
-        $call = $this->fileSaver->calls()[0];
-        $this->assertEquals(
-            $this->pathWeb . '/_StaticFileCache/https/example.com/my/fancy/page.html',
-            $call['path']
-        );
     }
 
-    public function testShouldAddIndexPhpToPathIfRewriteNotEnabled()
+    public function testShouldAddIndexPhpToPathIfRewriteNotEnabled(): void
     {
-        $this->environment->setRewriteEnabled(false);
+        $this->environment->method('isRewriteEnabled')->willReturn(false);
+        $this->fileSaver->expects($this->once())
+            ->method('saveFile')
+            ->with($this->equalTo($this->pathWeb . '/_StaticFileCache/https/example.com/index.php/my/fancy/page.html'));
         $this->subject->save(new Uri('https://example.com/my/fancy/page.html'), 'foo');
-        $call = $this->fileSaver->calls()[0];
-        $this->assertEquals(
-            $this->pathWeb . '/_StaticFileCache/https/example.com/index.php/my/fancy/page.html',
-            $call['path']
-        );
     }
 
-    public function testShouldIgnorePagesWithQueryString()
+    public function testShouldIgnorePagesWithQueryString(): void
     {
+        $this->fileSaver->expects($this->never())->method('saveFile');
         $this->subject->save(new Uri('https://example.com/my/fancy/page.html?foo=bar'), 'foo');
-        $this->assertFalse($this->fileSaver->wasCalled());
     }
 
-    public function testShouldAddIndexToPathIfNotAFile()
+    public function testShouldAddIndexToPathIfNotAFile(): void
     {
+        $this->environment->method('isRewriteEnabled')->willReturn(true);
+        $this->fileSaver->expects($this->once())
+            ->method('saveFile')
+            ->with($this->equalTo($this->pathWeb . '/_StaticFileCache/https/example.com/my/fancy/index.html'));
         $this->subject->save(new Uri('https://example.com/my/fancy/'), 'foo');
-        $call = $this->fileSaver->calls()[0];
-        $this->assertEquals(
-            $this->pathWeb . '/_StaticFileCache/https/example.com/my/fancy/index.html',
-            $call['path']
-        );
     }
 
-    public function testShouldIgnoreNeosBackendUrls()
+    public function testShouldIgnoreNeosBackendUrls(): void
     {
+        $this->fileSaver->expects($this->never())->method('saveFile');
         $this->subject->save(new Uri('https://example.com/neos/login'), 'foo');
-        $this->assertFalse($this->fileSaver->wasCalled());
     }
 
 }

@@ -2,16 +2,17 @@
 namespace J6s\StaticFileCache\Tests\Service;
 
 use J6s\StaticFileCache\Service\FilesystemSaver;
-use PHPUnit\Framework\TestCase;
+use Neos\Flow\Tests\FunctionalTestCase;
 
-class FilesystemSaverTest extends TestCase
+class FilesystemSaverTest extends FunctionalTestCase
 {
     /** @var FilesystemSaver */
     private $subject;
 
     public function setUp(): void
     {
-        $this->subject = new FilesystemSaver();
+        parent::setUp();
+        $this->subject = $this->objectManager->get(FilesystemSaver::class);
     }
 
     /** @dataProvider getTemporaryFileName */
@@ -20,6 +21,7 @@ class FilesystemSaverTest extends TestCase
         $this->assertFileNotExists($name);
         $this->subject->saveFile($name, 'foo');
         $this->assertFileExists($name);
+        unlink($name);
     }
 
     /** @dataProvider getTemporaryFileName */
@@ -29,6 +31,7 @@ class FilesystemSaverTest extends TestCase
         $this->assertStringEqualsFile($name, 'foo');
         $this->subject->saveFile($name, 'bar');
         $this->assertStringEqualsFile($name, 'bar');
+        unlink($name);
     }
 
     /** @dataProvider getTemporaryFileName */
@@ -39,6 +42,8 @@ class FilesystemSaverTest extends TestCase
         $this->assertDirectoryNotExists($directory);
         $this->subject->saveFile($name, 'foo');
         $this->assertDirectoryExists($directory);
+        unlink($name);
+        rmdir($directory);
     }
 
     /**

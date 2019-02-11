@@ -1,6 +1,9 @@
 {
     "name": "j6s/static-file-cache",
     "type": "neos-plugin",
+    "config": {
+        "vendor-dir": "Packages/Libraries"
+    },
     "require": {
         "neos/neos": "~4.2",
         "php": "~7.2"
@@ -9,7 +12,7 @@
         "roave/security-advisories": "dev-master",
         "phpstan/phpstan-shim": "^0.11.1",
         "squizlabs/php_codesniffer": "^3.4",
-        "phpunit/phpunit": "^8.0"
+        "phpunit/phpunit": "^7.5.4"
     },
     "autoload": {
         "psr-4": {
