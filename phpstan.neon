@@ -1,4 +1,6 @@
 parameters:
+    autoload_files:
+        - Packages/Libraries/autoload.php
     level: 7
     ignoreErrors:
       - '#Constant FLOW_PATH_WEB not found#'
