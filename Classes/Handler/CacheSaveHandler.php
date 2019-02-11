@@ -28,23 +28,7 @@ class CacheSaveHandler
 
     public function save(UriInterface $url, string $body): void
     {
-        if ($this->ignore($url)) {
-            return;
-        }
         $this->fileSaver->saveFile($this->pathFromUrl($url), $body);
-    }
-
-    private function ignore(UriInterface $uri): bool
-    {
-        if (!empty($uri->getQuery())) {
-            return true;
-        }
-
-        if (preg_match('/^\/?neos\//', $uri->getPath())) {
-            return true;
-        }
-
-        return false;
     }
 
     private function pathFromUrl(UriInterface $url): string

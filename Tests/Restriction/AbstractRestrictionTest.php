@@ -20,10 +20,15 @@ abstract class AbstractRestrictionTest extends FunctionalTestCase
     /** @var NodeController */
     protected $controller;
 
+    protected function requestWithUri(string $uri): ActionRequest
+    {
+        return new ActionRequest(Request::create(new Uri($uri)));
+    }
+
     public function setUp()
     {
         parent::setUp();
-        $this->request = new ActionRequest(Request::create(new Uri('http://localhost/typo3/flow/test')));
+        $this->request = $this->requestWithUri('http://neos.test/foo');
         $this->response = new Response();
         $this->controller = new NodeController();
     }

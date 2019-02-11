@@ -22,7 +22,9 @@ class RestrictionFactory
             $this->objectManager->get(OnlyAllowMainRequest::class),
             $this->objectManager->get(OnlyAllowNodeController::class),
             $this->objectManager->get(RespectCacheControlHeaders::class),
-            $this->objectManager->get(NodePropertyRestriction::class)
+            $this->objectManager->get(NodePropertyRestriction::class),
+            $this->objectManager->get(IgnoreUrlsWithQueryString::class),
+            $this->objectManager->get(IgnoreNeosBackendUrls::class),
         ]);
     }
 }

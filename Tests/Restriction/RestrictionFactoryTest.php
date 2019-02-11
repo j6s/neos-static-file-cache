@@ -2,6 +2,8 @@
 namespace J6s\StaticFileCache\Tests\Restriction;
 
 
+use J6s\StaticFileCache\Restriction\IgnoreNeosBackendUrls;
+use J6s\StaticFileCache\Restriction\IgnoreUrlsWithQueryString;
 use J6s\StaticFileCache\Restriction\NodePropertyRestriction;
 use J6s\StaticFileCache\Restriction\OnlyAllowMainRequest;
 use J6s\StaticFileCache\Restriction\OnlyAllowNodeController;
@@ -34,5 +36,7 @@ class RestrictionFactoryTest extends AbstractRestrictionTest
         $this->assertTrue($restrictions->contains(OnlyAllowNodeController::class));
         $this->assertTrue($restrictions->contains(RespectCacheControlHeaders::class));
         $this->assertTrue($restrictions->contains(NodePropertyRestriction::class));
+        $this->assertTrue($restrictions->contains(IgnoreNeosBackendUrls::class));
+        $this->assertTrue($restrictions->contains(IgnoreUrlsWithQueryString::class));
     }
 }

@@ -64,12 +64,6 @@ class CacheSaveHandlerTest extends FunctionalTestCase
         $this->subject->save(new Uri('https://example.com/my/fancy/page.html'), 'foo');
     }
 
-    public function testShouldIgnorePagesWithQueryString(): void
-    {
-        $this->fileSaver->expects($this->never())->method('saveFile');
-        $this->subject->save(new Uri('https://example.com/my/fancy/page.html?foo=bar'), 'foo');
-    }
-
     public function testShouldAddIndexToPathIfNotAFile(): void
     {
         $this->environment->method('isRewriteEnabled')->willReturn(true);
@@ -78,11 +72,4 @@ class CacheSaveHandlerTest extends FunctionalTestCase
             ->with($this->equalTo($this->pathWeb . '/_StaticFileCache/https/example.com/my/fancy/index.html'));
         $this->subject->save(new Uri('https://example.com/my/fancy/'), 'foo');
     }
-
-    public function testShouldIgnoreNeosBackendUrls(): void
-    {
-        $this->fileSaver->expects($this->never())->method('saveFile');
-        $this->subject->save(new Uri('https://example.com/neos/login'), 'foo');
-    }
-
 }
