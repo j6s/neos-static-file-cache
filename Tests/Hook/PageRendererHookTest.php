@@ -1,10 +1,10 @@
 <?php
 namespace J6s\StaticFileCache\Tests\Hook;
 
-use J6s\StaticFileCache\Domain\Repository\NodeDataRepository;
 use J6s\StaticFileCache\Handler\CacheSaveHandler;
 use J6s\StaticFileCache\Hook\PageRenderHook;
-use Neos\ContentRepository\Domain\Model\NodeData;
+use J6s\StaticFileCache\Restriction\RestrictionCollection;
+use J6s\StaticFileCache\Restriction\RestrictionFactory;
 use Neos\Flow\Http\Request;
 use Neos\Flow\Http\Response;
 use Neos\Flow\Http\Uri;
@@ -25,9 +25,6 @@ class PageRendererHookTest extends FunctionalTestCase
     /** @var MockObject<CacheSaveHandler> */
     protected $cacheSaveHandler;
 
-    /** @var Request */
-    protected $httpRequest;
-
     /** @var RequestInterface */
     protected $request;
 
@@ -40,9 +37,6 @@ class PageRendererHookTest extends FunctionalTestCase
     /** @var Uri */
     protected $uri;
 
-    /** @var MockObject<NodeData> */
-    protected $nodeData;
-
     public function setUp()
     {
         parent::setUp();
@@ -51,34 +45,25 @@ class PageRendererHookTest extends FunctionalTestCase
             ->setMethods([ 'save' ])
             ->getMock();
 
-        $this->nodeData = $this->getMockBuilder(NodeData::class)
-            ->setMethods([ 'getProperty' ])
-            ->disableOriginalConstructor()
+        // Restriction factory that builds empty restrictions.
+        // Restrictions are tested on their own.
+        $restrictionFactory = $this->getMockBuilder(RestrictionFactory::class)
+            ->setMethods([ 'get' ])
             ->getMock();
-
-        $nodeDataRepository = $this->getMockBuilder(NodeDataRepository::class)
-            ->setMethods([ 'findOneByCombinedPath' ])
-            ->getMock();
-        $nodeDataRepository->method('findOneByCombinedPath')->willReturn($this->nodeData);
+        $restrictionFactory->method('get')->willReturn(new RestrictionCollection([]));
 
         $this->uri = new Uri('http://localhost/typo3/flow/test');
-        $this->httpRequest = Request::create($this->uri);
-        $this->request = new ActionRequest($this->httpRequest);
-        $this->request->setArgument('node', '/sites/foo-bar');
+        $this->request = new ActionRequest(Request::create($this->uri));
         $this->response = new Response();
         $this->controller = new NodeController();
 
         $this->subject = $this->objectManager->get(PageRenderHook::class);
         $this->inject($this->subject, 'handler', $this->cacheSaveHandler);
-        $this->inject($this->subject, 'nodeDataRepository', $nodeDataRepository);
+        $this->inject($this->subject, 'restrictionFactory', $restrictionFactory);
     }
 
     public function testSavesResponseContentsInCache(): void
     {
-        $this->nodeData->method('getProperty')
-            ->with('cacheAsStaticFile')
-            ->willReturn(true);
-
         $this->cacheSaveHandler->expects($this->once())
             ->method('save')
             ->with($this->equalTo($this->uri));
@@ -89,49 +74,4 @@ class PageRendererHookTest extends FunctionalTestCase
             $this->controller
         );
     }
-
-    public function testDoesNotStoreSubRequestsInCache(): void
-    {
-        $this->cacheSaveHandler->expects($this->never())->method('save');
-        $this->subject->afterControllerInvocation(
-            new ActionRequest($this->request),
-            $this->response,
-            $this->controller
-        );
-    }
-
-    public function testOnlyStoresNodeRequestsInCache(): void
-    {
-        $this->cacheSaveHandler->expects($this->never())->method('save');
-        $this->subject->afterControllerInvocation(
-            $this->request,
-            $this->response,
-            new FooController()
-        );
-    }
-
-    public function testRespectsCacheControlHeader(): void
-    {
-        $this->httpRequest->getHeaders()->set('Cache-Control', 'no-cache');
-
-        $this->cacheSaveHandler->expects($this->never())->method('save');
-        $this->subject->afterControllerInvocation(
-            $this->request,
-            $this->response,
-            $this->controller
-        );
-    }
-
-    public function testRespectsPragmaHeader(): void
-    {
-        $this->httpRequest->getHeaders()->set('Pragma', 'no-cache');
-
-        $this->cacheSaveHandler->expects($this->never())->method('save');
-        $this->subject->afterControllerInvocation(
-            $this->request,
-            $this->response,
-            $this->controller
-        );
-    }
-
 }

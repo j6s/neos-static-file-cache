@@ -28,5 +28,4 @@ class NodeDataRepository extends \Neos\ContentRepository\Domain\Repository\NodeD
             $this->workspaceRepository->findByIdentifier($workspace)
         );
     }
-
 }
