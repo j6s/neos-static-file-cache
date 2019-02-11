@@ -1,0 +1,3 @@
+'Neos.Neos:Document':
+  superTypes:
+    'J6s.StaticFileCache:CacheMixin': true

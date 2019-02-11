@@ -1,9 +1,9 @@
 <?php
 namespace J6s\StaticFileCache\Hook;
 
+use J6s\StaticFileCache\Domain\Repository\NodeDataRepository;
 use J6s\StaticFileCache\Handler\CacheSaveHandler;
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Http\Request;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\RequestInterface;
@@ -17,6 +17,12 @@ class PageRenderHook
      * @Flow\Inject()
      */
     protected $handler;
+
+    /**
+     * @var NodeDataRepository
+     * @Flow\Inject()
+     */
+    protected $nodeDataRepository;
 
     public function afterControllerInvocation(
         RequestInterface $request,
@@ -48,6 +54,11 @@ class PageRenderHook
             return false;
         }
 
-        return true;
+        $nodeData = $this->nodeDataRepository->findOneByCombinedPath($request->getArgument('node'));
+        if (!$nodeData) {
+            return false;
+        }
+
+        return (bool) $nodeData->getProperty('cacheAsStaticFile');
     }
 }

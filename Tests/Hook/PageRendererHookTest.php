@@ -1,8 +1,10 @@
 <?php
 namespace J6s\StaticFileCache\Tests\Hook;
 
+use J6s\StaticFileCache\Domain\Repository\NodeDataRepository;
 use J6s\StaticFileCache\Handler\CacheSaveHandler;
 use J6s\StaticFileCache\Hook\PageRenderHook;
+use Neos\ContentRepository\Domain\Model\NodeData;
 use Neos\Flow\Http\Request;
 use Neos\Flow\Http\Response;
 use Neos\Flow\Http\Uri;
@@ -38,6 +40,9 @@ class PageRendererHookTest extends FunctionalTestCase
     /** @var Uri */
     protected $uri;
 
+    /** @var MockObject<NodeData> */
+    protected $nodeData;
+
     public function setUp()
     {
         parent::setUp();
@@ -46,18 +51,34 @@ class PageRendererHookTest extends FunctionalTestCase
             ->setMethods([ 'save' ])
             ->getMock();
 
+        $this->nodeData = $this->getMockBuilder(NodeData::class)
+            ->setMethods([ 'getProperty' ])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $nodeDataRepository = $this->getMockBuilder(NodeDataRepository::class)
+            ->setMethods([ 'findOneByCombinedPath' ])
+            ->getMock();
+        $nodeDataRepository->method('findOneByCombinedPath')->willReturn($this->nodeData);
+
         $this->uri = new Uri('http://localhost/typo3/flow/test');
         $this->httpRequest = Request::create($this->uri);
         $this->request = new ActionRequest($this->httpRequest);
+        $this->request->setArgument('node', '/sites/foo-bar');
         $this->response = new Response();
         $this->controller = new NodeController();
 
         $this->subject = $this->objectManager->get(PageRenderHook::class);
         $this->inject($this->subject, 'handler', $this->cacheSaveHandler);
+        $this->inject($this->subject, 'nodeDataRepository', $nodeDataRepository);
     }
 
     public function testSavesResponseContentsInCache(): void
     {
+        $this->nodeData->method('getProperty')
+            ->with('cacheAsStaticFile')
+            ->willReturn(true);
+
         $this->cacheSaveHandler->expects($this->once())
             ->method('save')
             ->with($this->equalTo($this->uri));

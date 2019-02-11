@@ -1,0 +1,17 @@
+'J6s.StaticFileCache:CacheMixin':
+  ui:
+    inspector:
+      groups:
+        staticFileCache:
+          label: i18n
+          icon: bolt
+          position: 200
+          tab: meta
+
+  properties:
+    cacheAsStaticFile:
+      type: boolean
+      ui:
+        label: i18n
+        inspector:
+          group: staticFileCache
